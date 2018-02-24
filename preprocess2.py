@@ -8,7 +8,12 @@ Created on Mon Feb 19 21:03:33 2018
 
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet, RidgeCV
+from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+import pandas as pd
+import seaborn as sns
 
 #transform xlsx to dataframe
 def xlsx_to_csv_pd(path):
@@ -31,7 +36,9 @@ def choose_column(df):
 	index = [col for col in index if col.find('Desc') == -1 or col.find('Calc Approach Desc') > -1 or col.find('Var Valve Timing Desc') > -1]
 	return df[index], index
 
-def fillna_mean(df,index,dft):
+def fillna_mean(dfo,index,dfto):
+    df = dfo.copy()
+    dft = dfto.copy()
     for col in index:
         if isinstance(df[col][0],(int,float)):
             df.loc[:,col] = df[col].fillna(df.mean()[col].tolist()[0]).tolist()
@@ -42,6 +49,8 @@ def fillna_mean(df,index,dft):
     return df,dft
 
 def fillna_median(df,index,dft):
+    df = dfo.copy()
+    dft = dfto.copy()
     for col in index:
         if isinstance(df[col][0],(int,float)):
             df.loc[:,col] = df[col].fillna(df.median()[col].tolist()[0]).tolist()
@@ -69,4 +78,21 @@ full_train,full_test = fillna_mean(filtered_train,column_name,filtered_test)
 #one hot encoding
 ohe_train,ohe_test = one_hot_encoding(full_train, full_test)
 
+#Standard Scaler
+scaler = StandardScaler()
+scaler.fit(ohe_train)
+X_train_scaled = scaler.transform(ohe_train)
+X_test_scaled = scaler.transform(ohe_test)
 
+#ridge regression
+ridge = Ridge().fit(X_train_scaled, train_y)
+ridge.score(X_test_scaled, test_y)
+
+#Lasso regression
+
+
+#ElasticNet
+
+#make pipeline
+all_features = make_pipeline(StandardScaler(), RidgeCV())
+print(np.mean(cross_val_score(all_features, X_train_scaled, train_y, cv= 10)))
