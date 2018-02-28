@@ -32,7 +32,7 @@ def choose_column(df):
 	count = df.shape[0] - df.count()
 	filtered =  count[count < len(df)*0.2]
 	index = list(filtered.index)
-	index = [col for col in index if col.find('EPA') == -1 and col.find('FE') == -1 and col.find('MPG') == -1 and col.find('CO2') == -1 and col.find('Smog') == -1 and col.find('Guzzler') == -1 and col.find('Release Date') == -1 and col.find('Mfr Name') == -1 and col.find('Verify Mfr Cd') == -1]
+	index = [col for col in index if col.find('EPA') == -1 and col.find('FE') == -1 and col.find('MPG') == -1 and col.find('CO2') == -1 and col.find('Smog') == -1 and col.find('Guzzler') == -1 and col.find('Release Date') == -1 and col.find('Mfr Name') == -1 and col.find('Verify Mfr Cd') == -1 and col.find('Fuel Unit - Conventional Fuel') == -1]
 	index = [col for col in index if col.find('Desc') == -1 or col.find('Calc Approach Desc') > -1 or col.find('Var Valve Timing Desc') > -1]
 	return df[index], index
 
@@ -41,24 +41,24 @@ def fillna_mean(dfo,index,dfto):
     dft = dfto.copy()
     for col in index:
         if isinstance(df[col][0],(int,float)):
-            df.loc[:,col] = df[col].fillna(df.mean()[col].tolist()[0]).tolist()
-            dft.loc[:,col] = dft[col].fillna(df.mean()[col].tolist()[0]).tolist()
+            dfo.loc[:,col] = df[col].fillna(df.mean()[col].tolist()[0]).tolist()
+            dfto.loc[:,col] = dft[col].fillna(df.mean()[col].tolist()[0]).tolist()
         else:
-            df.loc[:,col] = df[col].fillna(df.mode()[col].tolist()[0]).tolist()
-            dft.loc[:,col] = dft[col].fillna(df.mode()[col].tolist()[0]).tolist()
-    return df,dft
+            dfo.loc[:,col] = df[col].fillna(df.mode()[col].tolist()[0]).tolist()
+            dfto.loc[:,col] = dft[col].fillna(df.mode()[col].tolist()[0]).tolist()
+    return dfo,dfto
 
-def fillna_median(df,index,dft):
+def fillna_median(dfo,index,dfto):
     df = dfo.copy()
     dft = dfto.copy()
     for col in index:
         if isinstance(df[col][0],(int,float)):
-            df.loc[:,col] = df[col].fillna(df.median()[col].tolist()[0]).tolist()
-            dft.loc[:,col] = dft[col].fillna(df.median()[col].tolist()[0]).tolist()
+            dfo.loc[:,col] = df[col].fillna(df.median()[col].tolist()[0]).tolist()
+            dfto.loc[:,col] = dft[col].fillna(df.median()[col].tolist()[0]).tolist()
         else:
-            df.loc[:,col] = df[col].fillna(df.mode()[col].tolist()[0]).tolist()
-            dft.loc[:,col] = dft[col].fillna(df.mode()[col].tolist()[0]).tolist()
-    return df,dft
+            dfo.loc[:,col] = df[col].fillna(df.mode()[col].tolist()[0]).tolist()
+            dfto.loc[:,col] = dft[col].fillna(df.mode()[col].tolist()[0]).tolist()
+    return dfo,dfto
 
 def one_hot_encoding(train,test):
     full = pd.concat([train, test])
@@ -94,5 +94,5 @@ ridge.score(X_test_scaled, test_y)
 #ElasticNet
 
 #make pipeline
-all_features = make_pipeline(StandardScaler(), RidgeCV())
-print(np.mean(cross_val_score(all_features, X_train_scaled, train_y, cv= 10)))
+#all_features = make_pipeline(StandardScaler(), RidgeCV())
+print(np.mean(cross_val_score(RidgeCV(), X_train_scaled, train_y, cv= 10)))
