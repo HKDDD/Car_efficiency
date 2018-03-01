@@ -30,10 +30,12 @@ def rfimpute(df, full_df):
     filtered_train = df.copy()
     
     for i in range(10):
+        #print("Now loop "+str(i))
         X_imputed_dummies = pd.get_dummies(X_imputed)
         last = X_imputed_dummies.copy().as_matrix()
         for feature in range(filtered_train.shape[1]):
             feature_name = filtered_train.columns.values[feature]
+            #print("Performing on feature "+feature_name)
             
             #inds_not_f are column numbers that do not belong to feature column in dummies df
             inds_not_f = np.array([col for col in range(X_imputed_dummies.shape[1])\
@@ -55,11 +57,13 @@ def rfimpute(df, full_df):
                 X_imputed_dummies_colnames = X_imputed_dummies.columns.values
                 X_imputed_dummies = X_imputed_dummies.as_matrix()
                 
-                if len(inds_not_f) == X_imputed_dummies.shape[1] - 1: #numerical columns do not expand
+                if feature_name in X_imputed_dummies_colnames: #numerical columns
+                    #print(feature_name + " is numerical")
                     rf_reg.fit(X_imputed_dummies[~f_missing][:, inds_not_f], filtered_train[~f_missing, feature])
                     X_imputed[f_missing, feature] = rf_reg.predict(
                             X_imputed_dummies[f_missing][:, inds_not_f])
                 else: #for categorical a feature column
+                    #print(feature_name + " is categorical")
                     LabEnc = LabelEncoder()
                     y = LabEnc.fit_transform(filtered_train[~f_missing, feature])
                     rf_cla.fit(X_imputed_dummies[~f_missing][:, inds_not_f], y)
